@@ -28,11 +28,11 @@ int main(int argc, char **argv)
     char client_ip_string[INET_ADDRSTRLEN];
     char client_hostname[MAX_NAME_LEN];
 
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s <port>\n", argv[0]);
+    if (argc != 1) {
+        fprintf(stderr, "usage: %s\n", argv[0]);
         exit(0);
     }
-    port = atoi(argv[1]);
+    port = 2121;
 
     clientlen = (socklen_t)sizeof(clientaddr);
 
