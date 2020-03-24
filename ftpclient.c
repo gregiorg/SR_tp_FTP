@@ -1,6 +1,8 @@
 /*
  * echoclient.c - An echo client
  */
+#include <time.h>
+ 
 #include "csapp.h"
 
 char** splitCmd(char* rawCmd);
@@ -39,13 +41,13 @@ int main(int argc, char **argv)
         char** cmd = splitCmd(buf);   // split into tokens
         
         if(!strcmp("get", cmd[0])) {
-            // TODO : start timer
+            clock_t before = clock();
             Rio_writen(clientfd, cmd[1], strlen(cmd[1]));
             if(Rio_readlineb(&rio, buf, MAXLINE) > 0) {
                 
-                // TODO : stop timer
+                clock_t after = clock();
                 printf("Transfer successfull\n");
-                // TODO : display stats
+                printf("%d bytes received in %ld milliseconds\n", strlen(buf), (after - before));
                 
                 FILE* fp = fopen("test2.txt", "w"); // create and copy content into knew file
                 fwrite(buf, strlen(buf), 1, fp);
