@@ -14,33 +14,23 @@ void ftp(int connfd)
   Rio_readinitb(&rio, connfd);
 
   n = Rio_readlineb(&rio, buf, MAXLINE);
-  printf("server received %u bytes\n", (unsigned int)n);
 
   if (n > 1) { // n <= 1 would mean no actual ASCII symbol has been transmited
-    int p[2];
-    pipe(p);
 
-    if(!Fork()) { // child proccess
-      buf[strlen(buf)-1] = '\0';
-      close(p[0]); // close output
-			Dup2(p[1], 1); // replace standard output to pipe
+    FILE* fd;
+    if((fd = fopen(buf, "r"))) { // opened successfully
+      // obtain file size
+      int fSize;
+      fseek(fd, 0, SEEK_END);
+      fSize = ftell(fd);
+      fseek(fd, 0, SEEK_SET);
 
-      // create the reading command and executing it
-      char* cmd[3];
-      cmd[0] = "cat";
-      cmd[1] = buf;
-      cmd[2] = NULL;
-      execvp(cmd[0], cmd);
-      // TODO : need some sort of error management
+      fread(buf, fSize, 1, fd); // read the file in one go
 
-    } else { // father process
-      char resBuf[MAXBUF];
-      size_t m;
+      Rio_writen(connfd, buf, fSize); // send to client
 
-      close(p[1]); // close input
-      m = read(p[0], resBuf, MAXBUF); // read in pipe
-      close(p[0]); // close output
-      Rio_writen(connfd, resBuf, m); // write to client
+    } else { // error at file opening
+      // TODO : check errno
     }
   }
 }
