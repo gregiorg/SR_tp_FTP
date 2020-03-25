@@ -27,10 +27,7 @@ void ftp(int connfd)
 
       fread(buf, fSize, 1, fd); // read the file in one go
 
-      Rio_writen(connfd, buf, fSize); // send to client
-
-    } else { // error at file opening
-      // TODO : check errno
+      Rio_writen(connfd, buf, fSize); // send data to client
     }
   }
 }

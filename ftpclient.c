@@ -42,8 +42,8 @@ int main(int argc, char **argv)
 
         if(!strcmp("get", cmd[0])) {  // get command
             clock_t before = clock();
-            Rio_writen(clientfd, cmd[1], MAXLINE);
-            if(Rio_readlineb(&rio, buf, MAXLINE) > 0) {
+            Rio_writen(clientfd, cmd[1], MAXLINE);  // send file name to server
+            if(Rio_readnb(&rio, buf, MAXLINE) > 0) {  // sever sent back data
 
                 clock_t after = clock();
                 printf("Transfer successfull\n");
@@ -52,6 +52,8 @@ int main(int argc, char **argv)
                 FILE* fd = fopen("test2.txt", "w"); // create and copy content into knew file
                 fwrite(buf, strlen(buf), 1, fd);
                 fclose(fd);
+            } else { // server didn't send back data
+              printf("Server Error : server didn't send data. Check if command is valid\n");
             }
         } else {
             printf("Unkown command\n");
@@ -62,7 +64,11 @@ int main(int argc, char **argv)
     Close(clientfd);
     exit(0);
 }
-
+/*
+ * splitCmd : splits a string input into words and gets rid of spaces and \n
+ * input : char* rawCmd - the raw command line to split
+ * return : char** - an array of strings
+*/
 char** splitCmd(char* rawCmd) {
     char** resCmd = malloc(2*sizeof(char**));
     char delim[] = " \n";
