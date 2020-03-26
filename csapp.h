@@ -2,8 +2,8 @@
 #ifndef __CSAPP_H__
 #define __CSAPP_H__
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
@@ -50,7 +50,7 @@ typedef struct {
 /* $end rio_t */
 
 /* External variables */
-extern int h_errno;    /* defined by BIND for DNS errors */ 
+extern int h_errno;    /* defined by BIND for DNS errors */
 extern char **environ; /* defined by libc */
 
 /* Misc constants */
@@ -92,7 +92,7 @@ ssize_t Read(int fd, void *buf, size_t count);
 ssize_t Write(int fd, const void *buf, size_t count);
 off_t Lseek(int fildes, off_t offset, int whence);
 void Close(int fd);
-int Select(int  n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, 
+int Select(int  n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	   struct timeval *timeout);
 int Dup2(int fd1, int fd2);
 void Stat(const char *filename, struct stat *buf);
@@ -134,7 +134,7 @@ int Getnameinfo(const SA *sa, socklen_t salen, char *host, size_t hostlen,
                 char *serv, size_t servlen, int flags);
 
 /* Pthreads thread control wrappers */
-void Pthread_create(pthread_t *tidp, pthread_attr_t *attrp, 
+void Pthread_create(pthread_t *tidp, pthread_attr_t *attrp,
 		    void * (*routine)(void *), void *argp);
 void Pthread_join(pthread_t tid, void **thread_return);
 void Pthread_cancel(pthread_t tid);
@@ -151,14 +151,14 @@ void V(sem_t *sem);
 /* Rio (Robust I/O) package */
 ssize_t rio_readn(int fd, void *usrbuf, size_t n);
 ssize_t rio_writen(int fd, void *usrbuf, size_t n);
-void rio_readinitb(rio_t *rp, int fd); 
+void rio_readinitb(rio_t *rp, int fd);
 ssize_t	rio_readnb(rio_t *rp, void *usrbuf, size_t n);
 ssize_t	rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen);
 
 /* Wrappers for Rio package */
 ssize_t Rio_readn(int fd, void *usrbuf, size_t n);
 void Rio_writen(int fd, void *usrbuf, size_t n);
-void Rio_readinitb(rio_t *rp, int fd); 
+void Rio_readinitb(rio_t *rp, int fd);
 ssize_t Rio_readnb(rio_t *rp, void *usrbuf, size_t n);
 ssize_t Rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen);
 
@@ -169,7 +169,7 @@ int open_listenfd(int portno);
 
 /* Wrappers for client/server helper functions */
 int Open_clientfd(char *hostname, int port);
-int Open_listenfd(int port); 
+int Open_listenfd(int port);
 const char* Inet_ntop(int af, const void *src, char *dst, socklen_t size);
 int Inet_pton(int af, const char *src, void *dst);
 

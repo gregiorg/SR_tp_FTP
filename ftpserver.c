@@ -1,5 +1,5 @@
 /*
- * echoserveri.c - An iterative echo server
+ * ftpserver.c - An iterative ftp server
  */
 
 #include "csapp.h"

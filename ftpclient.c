@@ -1,5 +1,5 @@
 /*
- * echoclient.c - An echo client
+ * ftpclient.c - An ftp client
  */
 #include <time.h>
 
@@ -43,15 +43,23 @@ int main(int argc, char **argv)
         if(!strcmp("get", cmd[0])) {  // get command
             clock_t before = clock();
             Rio_writen(clientfd, cmd[1], MAXLINE);  // send file name to server
-            if(Rio_readnb(&rio, buf, MAXLINE) > 0) {  // sever sent back data
+
+            size_t nbBytesRead;
+            int nbTotalBytesRead = 0;
+            if((nbBytesRead = Rio_readnb(&rio, buf, MAXLINE)) > 0) {  // first read. If nothing if read then we have an error
+                FILE* fd = fopen("test2.txt", "w"); // create the new to copy into
+
+                do {
+                  nbTotalBytesRead += nbBytesRead;  // updating the total number of bytes read for stats later
+                  fwrite(buf, nbBytesRead, 1, fd);  // write data into file
+                } while((nbBytesRead = Rio_readnb(&rio, buf, MAXLINE)) > 0); // read at max MAXLINE bytes
+
+                fclose(fd);
 
                 clock_t after = clock();
                 printf("Transfer successfull\n");
-                printf("%lu bytes received in %ld milliseconds\n", strlen(buf), (after - before));
+                printf("%d bytes received in %ld milliseconds\n", nbTotalBytesRead, (after - before));
 
-                FILE* fd = fopen("test2.txt", "w"); // create and copy content into knew file
-                fwrite(buf, strlen(buf), 1, fd);
-                fclose(fd);
             } else { // server didn't send back data
               printf("Server Error : server didn't send data. Check if command is valid\n");
             }
