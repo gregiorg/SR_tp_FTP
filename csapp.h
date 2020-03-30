@@ -173,5 +173,8 @@ int Open_listenfd(int port);
 const char* Inet_ntop(int af, const void *src, char *dst, socklen_t size);
 int Inet_pton(int af, const char *src, void *dst);
 
+//////  PERSONAL FUNCTIONS //////
+char** splitCmd(char* rawCmd);
+
 #endif /* __CSAPP_H__ */
 /* $end csapp.h */

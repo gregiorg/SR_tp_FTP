@@ -4,6 +4,7 @@
 
 #include "csapp.h"
 
+
 void ftp(int connfd)
 {
   size_t n;
@@ -15,12 +16,16 @@ void ftp(int connfd)
 
   if (n > 1) { // n <= 1 would mean no actual ASCII symbol has been transmited
 
-    FILE* fd;
-    if((fd = fopen(buf, "r"))) { // opened successfully
+    char** cmd = splitCmd(buf);   // split into tokens
 
-      int nbBytesRead;
-      while((nbBytesRead = fread(buf, 1, MAXBUF, fd))) { // read MAXBUF bytes for data segmenting
-        Rio_writen(connfd, buf, nbBytesRead); // send to client
+    if (!strcmp("get", cmd[0])) {
+      FILE* fd;
+      if((fd = fopen(cmd[1], "r"))) { // opened successfully
+
+        int nbBytesRead;
+        while((nbBytesRead = fread(buf, 1, MAXBUF, fd))) { // read MAXBUF bytes for data segmenting
+          Rio_writen(connfd, buf, nbBytesRead); // send to client
+        }
       }
     }
   }

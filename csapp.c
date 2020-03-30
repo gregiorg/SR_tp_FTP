@@ -1,7 +1,7 @@
 /* $begin csapp.c */
 #include "csapp.h"
 
-/************************** 
+/**************************
  * Error-handling functions
  **************************/
 /* $begin errorfuns */
@@ -47,7 +47,7 @@ void app_error(char *msg) /* application error */
  ********************************************/
 
 /* $begin forkwrapper */
-pid_t Fork(void) 
+pid_t Fork(void)
 {
     pid_t pid;
 
@@ -57,14 +57,14 @@ pid_t Fork(void)
 }
 /* $end forkwrapper */
 
-void Execve(const char *filename, char *const argv[], char *const envp[]) 
+void Execve(const char *filename, char *const argv[], char *const envp[])
 {
     if (execve(filename, argv, envp) < 0)
 	unix_error("Execve error");
 }
 
 /* $begin wait */
-pid_t Wait(int *status) 
+pid_t Wait(int *status)
 {
     pid_t pid;
 
@@ -74,17 +74,17 @@ pid_t Wait(int *status)
 }
 /* $end wait */
 
-pid_t Waitpid(pid_t pid, int *iptr, int options) 
+pid_t Waitpid(pid_t pid, int *iptr, int options)
 {
     pid_t retpid;
 
-    if ((retpid  = waitpid(pid, iptr, options)) < 0) 
+    if ((retpid  = waitpid(pid, iptr, options)) < 0)
 	unix_error("Waitpid error");
     return(retpid);
 }
 
 /* $begin kill */
-void Kill(pid_t pid, int signum) 
+void Kill(pid_t pid, int signum)
 {
     int rc;
 
@@ -93,13 +93,13 @@ void Kill(pid_t pid, int signum)
 }
 /* $end kill */
 
-void Pause() 
+void Pause()
 {
     (void)pause();
     return;
 }
 
-unsigned int Sleep(unsigned int secs) 
+unsigned int Sleep(unsigned int secs)
 {
     return sleep(secs);
 }
@@ -107,7 +107,7 @@ unsigned int Sleep(unsigned int secs)
 unsigned int Alarm(unsigned int seconds) {
     return alarm(seconds);
 }
- 
+
 void Setpgid(pid_t pid, pid_t pgid) {
     int rc;
 
@@ -121,15 +121,15 @@ pid_t Getpgrp(void) {
 }
 
 /************************************
- * Wrappers for Unix signal functions 
+ * Wrappers for Unix signal functions
  ***********************************/
 
 /* $begin sigaction */
-handler_t *Signal(int signum, handler_t *handler) 
+handler_t *Signal(int signum, handler_t *handler)
 {
     struct sigaction action, old_action;
 
-    action.sa_handler = handler;  
+    action.sa_handler = handler;
     sigemptyset(&action.sa_mask); /* block sigs of type being handled */
     action.sa_flags = SA_RESTART; /* restart syscalls if possible */
 
@@ -154,7 +154,7 @@ void Sigemptyset(sigset_t *set)
 }
 
 void Sigfillset(sigset_t *set)
-{ 
+{
     if (sigfillset(set) < 0)
 	unix_error("Sigfillset error");
     return;
@@ -187,7 +187,7 @@ int Sigismember(const sigset_t *set, int signum)
  * Wrappers for Unix I/O routines
  ********************************/
 
-int Open(const char *pathname, int flags, mode_t mode) 
+int Open(const char *pathname, int flags, mode_t mode)
 {
     int rc;
 
@@ -196,16 +196,16 @@ int Open(const char *pathname, int flags, mode_t mode)
     return rc;
 }
 
-ssize_t Read(int fd, void *buf, size_t count) 
+ssize_t Read(int fd, void *buf, size_t count)
 {
     ssize_t rc;
 
-    if ((rc = read(fd, buf, count)) < 0) 
+    if ((rc = read(fd, buf, count)) < 0)
 	unix_error("Read error");
     return rc;
 }
 
-ssize_t Write(int fd, const void *buf, size_t count) 
+ssize_t Write(int fd, const void *buf, size_t count)
 {
     ssize_t rc;
 
@@ -214,7 +214,7 @@ ssize_t Write(int fd, const void *buf, size_t count)
     return rc;
 }
 
-off_t Lseek(int fildes, off_t offset, int whence) 
+off_t Lseek(int fildes, off_t offset, int whence)
 {
     off_t rc;
 
@@ -223,7 +223,7 @@ off_t Lseek(int fildes, off_t offset, int whence)
     return rc;
 }
 
-void Close(int fd) 
+void Close(int fd)
 {
     int rc;
 
@@ -232,7 +232,7 @@ void Close(int fd)
 }
 
 int Select(int  n, fd_set *readfds, fd_set *writefds,
-	   fd_set *exceptfds, struct timeval *timeout) 
+	   fd_set *exceptfds, struct timeval *timeout)
 {
     int rc;
 
@@ -241,7 +241,7 @@ int Select(int  n, fd_set *readfds, fd_set *writefds,
     return rc;
 }
 
-int Dup2(int fd1, int fd2) 
+int Dup2(int fd1, int fd2)
 {
     int rc;
 
@@ -250,13 +250,13 @@ int Dup2(int fd1, int fd2)
     return rc;
 }
 
-void Stat(const char *filename, struct stat *buf) 
+void Stat(const char *filename, struct stat *buf)
 {
     if (stat(filename, buf) < 0)
 	unix_error("Stat error");
 }
 
-void Fstat(int fd, struct stat *buf) 
+void Fstat(int fd, struct stat *buf)
 {
     if (fstat(fd, buf) < 0)
 	unix_error("Fstat error");
@@ -265,7 +265,7 @@ void Fstat(int fd, struct stat *buf)
 /***************************************
  * Wrappers for memory mapping functions
  ***************************************/
-void *Mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset) 
+void *Mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
 {
     void *ptr;
 
@@ -274,7 +274,7 @@ void *Mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
     return(ptr);
 }
 
-void Munmap(void *start, size_t length) 
+void Munmap(void *start, size_t length)
 {
     if (munmap(start, length) < 0)
 	unix_error("munmap error");
@@ -284,7 +284,7 @@ void Munmap(void *start, size_t length)
  * Wrappers for dynamic storage allocation functions
  ***************************************************/
 
-void *Malloc(size_t size) 
+void *Malloc(size_t size)
 {
     void *p;
 
@@ -293,7 +293,7 @@ void *Malloc(size_t size)
     return p;
 }
 
-void *Realloc(void *ptr, size_t size) 
+void *Realloc(void *ptr, size_t size)
 {
     void *p;
 
@@ -302,7 +302,7 @@ void *Realloc(void *ptr, size_t size)
     return p;
 }
 
-void *Calloc(size_t nmemb, size_t size) 
+void *Calloc(size_t nmemb, size_t size)
 {
     void *p;
 
@@ -311,7 +311,7 @@ void *Calloc(size_t nmemb, size_t size)
     return p;
 }
 
-void Free(void *ptr) 
+void Free(void *ptr)
 {
     free(ptr);
 }
@@ -319,13 +319,13 @@ void Free(void *ptr)
 /******************************************
  * Wrappers for the Standard I/O functions.
  ******************************************/
-void Fclose(FILE *fp) 
+void Fclose(FILE *fp)
 {
     if (fclose(fp) != 0)
 	unix_error("Fclose error");
 }
 
-FILE *Fdopen(int fd, const char *type) 
+FILE *Fdopen(int fd, const char *type)
 {
     FILE *fp;
 
@@ -335,7 +335,7 @@ FILE *Fdopen(int fd, const char *type)
     return fp;
 }
 
-char *Fgets(char *ptr, int n, FILE *stream) 
+char *Fgets(char *ptr, int n, FILE *stream)
 {
     char *rptr;
 
@@ -345,7 +345,7 @@ char *Fgets(char *ptr, int n, FILE *stream)
     return rptr;
 }
 
-FILE *Fopen(const char *filename, const char *mode) 
+FILE *Fopen(const char *filename, const char *mode)
 {
     FILE *fp;
 
@@ -355,33 +355,33 @@ FILE *Fopen(const char *filename, const char *mode)
     return fp;
 }
 
-void Fputs(const char *ptr, FILE *stream) 
+void Fputs(const char *ptr, FILE *stream)
 {
     if (fputs(ptr, stream) == EOF)
 	unix_error("Fputs error");
 }
 
-size_t Fread(void *ptr, size_t size, size_t nmemb, FILE *stream) 
+size_t Fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
     size_t n;
 
-    if (((n = fread(ptr, size, nmemb, stream)) < nmemb) && ferror(stream)) 
+    if (((n = fread(ptr, size, nmemb, stream)) < nmemb) && ferror(stream))
 	unix_error("Fread error");
     return n;
 }
 
-void Fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream) 
+void Fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
     if (fwrite(ptr, size, nmemb, stream) < nmemb)
 	unix_error("Fwrite error");
 }
 
 
-/**************************** 
+/****************************
  * Sockets interface wrappers
  ****************************/
 
-int Socket(int domain, int type, int protocol) 
+int Socket(int domain, int type, int protocol)
 {
     int rc;
 
@@ -390,7 +390,7 @@ int Socket(int domain, int type, int protocol)
     return rc;
 }
 
-void Setsockopt(int s, int level, int optname, const void *optval, int optlen) 
+void Setsockopt(int s, int level, int optname, const void *optval, int optlen)
 {
     int rc;
 
@@ -398,7 +398,7 @@ void Setsockopt(int s, int level, int optname, const void *optval, int optlen)
 	unix_error("Setsockopt error");
 }
 
-void Bind(int sockfd, struct sockaddr *my_addr, int addrlen) 
+void Bind(int sockfd, struct sockaddr *my_addr, int addrlen)
 {
     int rc;
 
@@ -406,7 +406,7 @@ void Bind(int sockfd, struct sockaddr *my_addr, int addrlen)
 	unix_error("Bind error");
 }
 
-void Listen(int s, int backlog) 
+void Listen(int s, int backlog)
 {
     int rc;
 
@@ -414,7 +414,7 @@ void Listen(int s, int backlog)
 	unix_error("Listen error");
 }
 
-int Accept(int s, struct sockaddr *addr, socklen_t *addrlen) 
+int Accept(int s, struct sockaddr *addr, socklen_t *addrlen)
 {
     int rc;
 
@@ -423,7 +423,7 @@ int Accept(int s, struct sockaddr *addr, socklen_t *addrlen)
     return rc;
 }
 
-void Connect(int sockfd, struct sockaddr *serv_addr, int addrlen) 
+void Connect(int sockfd, struct sockaddr *serv_addr, int addrlen)
 {
     int rc;
 
@@ -432,11 +432,11 @@ void Connect(int sockfd, struct sockaddr *serv_addr, int addrlen)
 }
 
 /************************
- * DNS interface wrappers 
+ * DNS interface wrappers
  ***********************/
 
 /* $begin gethostbyname */
-struct hostent *Gethostbyname(const char *name) 
+struct hostent *Gethostbyname(const char *name)
 {
     struct hostent *p;
 
@@ -446,7 +446,7 @@ struct hostent *Gethostbyname(const char *name)
 }
 /* $end gethostbyname */
 
-struct hostent *Gethostbyaddr(const char *addr, int len, int type) 
+struct hostent *Gethostbyaddr(const char *addr, int len, int type)
 {
     struct hostent *p;
 
@@ -462,9 +462,9 @@ int Getaddrinfo(const char *node, const char *service,
     if ((r = getaddrinfo(node, service, hints, res)) != 0) {
         new_dns_error("Getaddrinfo error", r);
     }
-    return r;                
+    return r;
 }
-                
+
 
 int Getnameinfo(const SA *sa, socklen_t salen, char *host, size_t hostlen,
                 char *serv, size_t servlen, int flags)
@@ -481,8 +481,8 @@ int Getnameinfo(const SA *sa, socklen_t salen, char *host, size_t hostlen,
  * Wrappers for Pthreads thread control functions
  ************************************************/
 
-void Pthread_create(pthread_t *tidp, pthread_attr_t *attrp, 
-		    void * (*routine)(void *), void *argp) 
+void Pthread_create(pthread_t *tidp, pthread_attr_t *attrp,
+		    void * (*routine)(void *), void *argp)
 {
     int rc;
 
@@ -520,7 +520,7 @@ void Pthread_exit(void *retval) {
 pthread_t Pthread_self(void) {
     return pthread_self();
 }
- 
+
 void Pthread_once(pthread_once_t *once_control, void (*init_function)()) {
     pthread_once(once_control, init_function);
 }
@@ -529,19 +529,19 @@ void Pthread_once(pthread_once_t *once_control, void (*init_function)()) {
  * Wrappers for Posix semaphores
  *******************************/
 
-void Sem_init(sem_t *sem, int pshared, unsigned int value) 
+void Sem_init(sem_t *sem, int pshared, unsigned int value)
 {
     if (sem_init(sem, pshared, value) < 0)
 	unix_error("Sem_init error");
 }
 
-void P(sem_t *sem) 
+void P(sem_t *sem)
 {
     if (sem_wait(sem) < 0)
 	unix_error("P error");
 }
 
-void V(sem_t *sem) 
+void V(sem_t *sem)
 {
     if (sem_post(sem) < 0)
 	unix_error("V error");
@@ -554,7 +554,7 @@ void V(sem_t *sem)
  * rio_readn - robustly read n bytes (unbuffered)
  */
 /* $begin rio_readn */
-ssize_t rio_readn(int fd, void *usrbuf, size_t n) 
+ssize_t rio_readn(int fd, void *usrbuf, size_t n)
 {
     size_t nleft = n;
     ssize_t nread;
@@ -565,8 +565,8 @@ ssize_t rio_readn(int fd, void *usrbuf, size_t n)
 	    if (errno == EINTR) /* interrupted by sig handler return */
 		nread = 0;      /* and call read() again */
 	    else
-		return -1;      /* errno set by read() */ 
-	} 
+		return -1;      /* errno set by read() */
+	}
 	else if (nread == 0)
 	    break;              /* EOF */
 	nleft -= nread;
@@ -580,7 +580,7 @@ ssize_t rio_readn(int fd, void *usrbuf, size_t n)
  * rio_writen - robustly write n bytes (unbuffered)
  */
 /* $begin rio_writen */
-ssize_t rio_writen(int fd, void *usrbuf, size_t n) 
+ssize_t rio_writen(int fd, void *usrbuf, size_t n)
 {
     size_t nleft = n;
     ssize_t nwritten;
@@ -601,7 +601,7 @@ ssize_t rio_writen(int fd, void *usrbuf, size_t n)
 /* $end rio_writen */
 
 
-/* 
+/*
  * rio_read - This is a wrapper for the Unix read() function that
  *    transfers min(n, rio_cnt) bytes from an internal buffer to a user
  *    buffer, where n is the number of bytes requested by the user and
@@ -615,7 +615,7 @@ static ssize_t rio_read(rio_t *rp, char *usrbuf, size_t n)
     int cnt;
 
     while (rp->rio_cnt <= 0) {  /* refill if buf is empty */
-	rp->rio_cnt = read(rp->rio_fd, rp->rio_buf, 
+	rp->rio_cnt = read(rp->rio_fd, rp->rio_buf,
 			   sizeof(rp->rio_buf));
 	if (rp->rio_cnt < 0) {
 	    if (errno != EINTR) /* interrupted by sig handler return */
@@ -623,13 +623,13 @@ static ssize_t rio_read(rio_t *rp, char *usrbuf, size_t n)
 	}
 	else if (rp->rio_cnt == 0)  /* EOF */
 	    return 0;
-	else 
+	else
 	    rp->rio_bufptr = rp->rio_buf; /* reset buffer ptr */
     }
 
     /* Copy min(n, rp->rio_cnt) bytes from internal buf to user buf */
-    cnt = n;          
-    if ((size_t)(rp->rio_cnt) < n)   
+    cnt = n;
+    if ((size_t)(rp->rio_cnt) < n)
 	cnt = rp->rio_cnt;
     memcpy(usrbuf, rp->rio_bufptr, cnt);
     rp->rio_bufptr += cnt;
@@ -642,10 +642,10 @@ static ssize_t rio_read(rio_t *rp, char *usrbuf, size_t n)
  * rio_readinitb - Associate a descriptor with a read buffer and reset buffer
  */
 /* $begin rio_readinitb */
-void rio_readinitb(rio_t *rp, int fd) 
+void rio_readinitb(rio_t *rp, int fd)
 {
-    rp->rio_fd = fd;  
-    rp->rio_cnt = 0;  
+    rp->rio_fd = fd;
+    rp->rio_cnt = 0;
     rp->rio_bufptr = rp->rio_buf;
 }
 /* $end rio_readinitb */
@@ -654,19 +654,19 @@ void rio_readinitb(rio_t *rp, int fd)
  * rio_readnb - Robustly read n bytes (buffered)
  */
 /* $begin rio_readnb */
-ssize_t rio_readnb(rio_t *rp, void *usrbuf, size_t n) 
+ssize_t rio_readnb(rio_t *rp, void *usrbuf, size_t n)
 {
     size_t nleft = n;
     ssize_t nread;
     char *bufp = usrbuf;
-    
+
     while (nleft > 0) {
 	if ((nread = rio_read(rp, bufp, nleft)) < 0) {
 	    if (errno == EINTR) /* interrupted by sig handler return */
 		nread = 0;      /* call read() again */
 	    else
-		return -1;      /* errno set by read() */ 
-	} 
+		return -1;      /* errno set by read() */
+	}
 	else if (nread == 0)
 	    break;              /* EOF */
 	nleft -= nread;
@@ -676,16 +676,16 @@ ssize_t rio_readnb(rio_t *rp, void *usrbuf, size_t n)
 }
 /* $end rio_readnb */
 
-/* 
+/*
  * rio_readlineb - robustly read a text line (buffered)
  */
 /* $begin rio_readlineb */
-ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen) 
+ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen)
 {
     int n, rc;
     char c, *bufp = usrbuf;
 
-    for (n = 1; (size_t)n < maxlen; n++) { 
+    for (n = 1; (size_t)n < maxlen; n++) {
 	if ((rc = rio_read(rp, &c, 1)) == 1) {
 	    *bufp++ = c;
 	    if (c == '\n')
@@ -706,16 +706,16 @@ ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen)
 /**********************************
  * Wrappers for robust I/O routines
  **********************************/
-ssize_t Rio_readn(int fd, void *ptr, size_t nbytes) 
+ssize_t Rio_readn(int fd, void *ptr, size_t nbytes)
 {
     ssize_t n;
-  
+
     if ((n = rio_readn(fd, ptr, nbytes)) < 0)
 	unix_error("Rio_readn error");
     return n;
 }
 
-void Rio_writen(int fd, void *usrbuf, size_t n) 
+void Rio_writen(int fd, void *usrbuf, size_t n)
 {
     if (rio_writen(fd, usrbuf, n) != (ssize_t)n)
 	unix_error("Rio_writen error");
@@ -724,9 +724,9 @@ void Rio_writen(int fd, void *usrbuf, size_t n)
 void Rio_readinitb(rio_t *rp, int fd)
 {
     rio_readinitb(rp, fd);
-} 
+}
 
-ssize_t Rio_readnb(rio_t *rp, void *usrbuf, size_t n) 
+ssize_t Rio_readnb(rio_t *rp, void *usrbuf, size_t n)
 {
     ssize_t rc;
 
@@ -735,26 +735,26 @@ ssize_t Rio_readnb(rio_t *rp, void *usrbuf, size_t n)
     return rc;
 }
 
-ssize_t Rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen) 
+ssize_t Rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen)
 {
     ssize_t rc;
 
     if ((rc = rio_readlineb(rp, usrbuf, maxlen)) < 0)
 	unix_error("Rio_readlineb error");
     return rc;
-} 
+}
 
-/******************************** 
+/********************************
  * Client/server helper functions
  ********************************/
 
 int gai_error;
 
 /*
- * open_clientfd - open connection to server at <hostname, port> 
+ * open_clientfd - open connection to server at <hostname, port>
  *   and return a socket descriptor ready for reading and writing.
  *   Returns a negative value on error.
- *      If this negative value equals -1, then check errno for details. 
+ *      If this negative value equals -1, then check errno for details.
  *      If this negative value equals -2, then use gai_strerror(gai_error)
  *          for details.
  */
@@ -765,40 +765,40 @@ int open_clientfd(char *hostname, int port)
     struct addrinfo *server_info;
     struct sockaddr_in *serveraddr;
     int r;
-       
+
     if ((clientfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         return -1; /* check errno for cause of error */
     }
-    
+
     /* Prepare 'hints' to specify the kind of information we are looking for */
     memset((void *)&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_INET; /* we only care about IPv4 addresses */
-    
-    /* 
+
+    /*
      * Fill in the server's IP address in the serveraddr struct.
      * Note that the 'hostname' input parameter can be either a hostname or
      * a numeric address string.
      */
     if ((r = getaddrinfo(hostname, NULL, &hints, &server_info)) != 0) {
         gai_error = r;
-        return -2; 
+        return -2;
     }
-     
+
     /* This should never happen if getaddrinfo completed successfully */
-    if ((server_info == NULL) || (server_info->ai_addr == NULL)) { 
+    if ((server_info == NULL) || (server_info->ai_addr == NULL)) {
         app_error("getaddrinfo returned weird result");
     }
-     
-    /* 
+
+    /*
      * Note that the DNS query may return several results
      * (for example, if the hostname corresponds to multiple IP addresses).
      * We will only use the first result in the list.
      */
     serveraddr = (struct sockaddr_in *) (server_info->ai_addr);
-     
+
     /* Fill in the server's port number in the serveraddr struct */
     serveraddr->sin_port = htons(port);
-     
+
     /* Establish a connection with the server */
     if (connect(clientfd, (SA *)serveraddr, sizeof(*serveraddr)) < 0) {
         return -1; /* check errno for details */
@@ -806,35 +806,35 @@ int open_clientfd(char *hostname, int port)
 
     /* Free the memory allocated for the result(s) of the getaddrinfo query */
     freeaddrinfo(server_info);
-     
+
     return clientfd;
 }
 
-/*  
+/*
  * open_listenfd - open and return a listening socket on port
  *     Returns -1 and sets errno on Unix error.
  */
 /* $begin open_listenfd */
-int open_listenfd(int port) 
+int open_listenfd(int port)
 {
     int listenfd, optval=1;
     struct sockaddr_in serveraddr;
-  
+
     /* Create a socket descriptor */
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	return -1;
- 
+
     /* Eliminates "Address already in use" error from bind. */
-    if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, 
+    if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR,
 		   (const void *)&optval , sizeof(int)) < 0)
 	return -1;
 
     /* Listenfd will be an endpoint for all requests to port
        on any IP address for this host */
     bzero((char *) &serveraddr, sizeof(serveraddr));
-    serveraddr.sin_family = AF_INET; 
-    serveraddr.sin_addr.s_addr = htonl(INADDR_ANY); 
-    serveraddr.sin_port = htons((unsigned short)port); 
+    serveraddr.sin_family = AF_INET;
+    serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serveraddr.sin_port = htons((unsigned short)port);
     if (bind(listenfd, (SA *)&serveraddr, sizeof(serveraddr)) < 0)
 	return -1;
 
@@ -846,16 +846,16 @@ int open_listenfd(int port)
 /* $end open_listenfd */
 
 /******************************************
- * Wrappers for the client/server helper routines 
+ * Wrappers for the client/server helper routines
  ******************************************/
-int Open_clientfd(char *hostname, int port) 
+int Open_clientfd(char *hostname, int port)
 {
     int rc;
 
     if ((rc = open_clientfd(hostname, port)) < 0) {
         if (rc == -1) {
             unix_error("Open_clientfd error");
-        } else if(rc == -2) {       
+        } else if(rc == -2) {
             new_dns_error("Open_clientfd (getaddrinfo) error", gai_error);
         } else {
             app_error("Open_clientfd: unexpected error type");
@@ -864,7 +864,7 @@ int Open_clientfd(char *hostname, int port)
     return rc;
 }
 
-int Open_listenfd(int port) 
+int Open_listenfd(int port)
 {
     int rc;
 
@@ -876,7 +876,7 @@ int Open_listenfd(int port)
 const char* Inet_ntop(int af, const void *src, char *dst, socklen_t size)
 {
     const char* r;
-    
+
     if ((r = inet_ntop(af, src, dst, size)) == NULL) {
         unix_error("Inet_ntop error");
     }
@@ -886,22 +886,36 @@ const char* Inet_ntop(int af, const void *src, char *dst, socklen_t size)
 int Inet_pton(int af, const char *src, void *dst)
 {
     int r;
-    
+
     r = inet_pton(af, src, dst);
-    
+
     if (r == 0) {
         app_error("Inet_pton error: src string does not correspond to a valid address representation");
     }
-    
+
     if (r < 0) {
         unix_error("Inet_pton error");
-    }    
-    
+    }
+
     return r;
 }
 
+////////   PERSONAL FUNCTIONS   ////////
+/*
+ * splitCmd : splits a string input into words and gets rid of spaces and \n
+ * input : char* rawCmd - the raw command line to split
+ * return : char** - an array of strings
+*/
+char** splitCmd(char* rawCmd) {
+    char** resCmd = malloc(2*sizeof(char**));
+    char delim[] = " \n";
+    char* tempCmd = malloc(strlen(rawCmd));
+    strcpy(tempCmd, rawCmd);
+
+    resCmd[0] = strtok(tempCmd, delim);
+    resCmd[1] = strtok(NULL, delim);
+
+    return resCmd;
+}
+
 /* $end csapp.c */
-
-
-
-

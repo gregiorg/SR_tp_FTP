@@ -5,7 +5,6 @@
 
 #include "csapp.h"
 
-char** splitCmd(char* rawCmd);
 
 int main(int argc, char **argv)
 {
@@ -42,11 +41,12 @@ int main(int argc, char **argv)
 
         if(!strcmp("get", cmd[0])) {  // get command
             clock_t before = clock();
-            Rio_writen(clientfd, cmd[1], MAXLINE);  // send file name to server
+            printf("%s\n", buf);
+            Rio_writen(clientfd, buf, MAXLINE);  // send file name to server
 
             size_t nbBytesRead;
             int nbTotalBytesRead = 0;
-            if((nbBytesRead = Rio_readnb(&rio, buf, MAXLINE)) > 0) {  // first read. If nothing if read then we have an error
+            if((nbBytesRead = Rio_readnb(&rio, buf, MAXLINE)) > 0) {  // first read. If nothing is read then we have an error
                 FILE* fd = fopen("test2.txt", "w"); // create the new to copy into
 
                 do {
@@ -71,18 +71,4 @@ int main(int argc, char **argv)
 
     Close(clientfd);
     exit(0);
-}
-/*
- * splitCmd : splits a string input into words and gets rid of spaces and \n
- * input : char* rawCmd - the raw command line to split
- * return : char** - an array of strings
-*/
-char** splitCmd(char* rawCmd) {
-    char** resCmd = malloc(2*sizeof(char**));
-    char delim[] = " \n";
-
-    resCmd[0] = strtok(rawCmd, delim);
-    resCmd[1] = strtok(NULL, delim);
-
-    return resCmd;
 }
