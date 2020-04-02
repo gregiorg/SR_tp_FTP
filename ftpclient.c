@@ -5,11 +5,13 @@
 
 #include "csapp.h"
 
+void getCmdClient(int clientfd, rio_t rio, char* buf);
 
 int main(int argc, char **argv)
 {
     int clientfd, port;
-    char *host, buf[MAXLINE];
+    char *host;
+    char rawCmd[MAXLINE];
     rio_t rio;
 
     if (argc != 2) {
@@ -35,40 +37,66 @@ int main(int argc, char **argv)
 
     Rio_readinitb(&rio, clientfd);
 
-    printf("ftp> "); // prompt line
-    if(Fgets(buf, MAXLINE, stdin)) {
-        char** cmd = splitCmd(buf);   // split into tokens
+    int isConnectionOpen = 1;
 
-        if(!strcmp("get", cmd[0])) {  // get command
-            clock_t before = clock();
-            printf("%s\n", buf);
-            Rio_writen(clientfd, buf, MAXLINE);  // send file name to server
+    while(isConnectionOpen) {
+      printf("ftp> "); // prompt line
+      if(Fgets(rawCmd, MAXLINE, stdin)) { // read user imput
+          char** cmd = splitCmd(rawCmd);   // split raw cmd into tokens
 
-            size_t nbBytesRead;
-            int nbTotalBytesRead = 0;
-            if((nbBytesRead = Rio_readnb(&rio, buf, MAXLINE)) > 0) {  // first read. If nothing is read then we have an error
-                FILE* fd = fopen("test2.txt", "w"); // create the new to copy into
+          if(!strcmp("get", cmd[0])) {  // get command
+              getCmdClient(clientfd, rio, rawCmd);
 
-                do {
-                  nbTotalBytesRead += nbBytesRead;  // updating the total number of bytes read for stats later
-                  fwrite(buf, nbBytesRead, 1, fd);  // write data into file
-                } while((nbBytesRead = Rio_readnb(&rio, buf, MAXLINE)) > 0); // read at max MAXLINE bytes
+          } else if(!strcmp("bye", cmd[0])) { // client asked to end connection
+            Close(clientfd);
+            isConnectionOpen = 0;
 
-                fclose(fd);
-
-                clock_t after = clock();
-                printf("Transfer successfull\n");
-                printf("%d bytes received in %ld milliseconds\n", nbTotalBytesRead, (after - before));
-
-            } else { // server didn't send back data
-              printf("Server Error : server didn't send data. Check if command is valid\n");
-            }
-        } else {
-            printf("Unkown command\n");
-        }
-
+          } else {
+              printf("Unkown command\n");
+          }
+      }
     }
 
-    Close(clientfd);
     exit(0);
+}
+
+/*
+* This function follows the protocole that copies a file from the Server.
+* First the user command is sent to the server, then the client reads the size
+* of the file and finally, the client reads the file MAXBUF bytes at a time.
+* In cass of error, server will send a negative file size
+*/
+void getCmdClient(int clientfd, rio_t rio, char* rawCmd) {
+  char data[MAXBUF]; // buffer to read the file
+
+  clock_t before = clock(); // before timestamp for stats later
+
+  send(clientfd, rawCmd, strlen(rawCmd), 0);  // send raw cmd to server
+
+  // read the file size
+  recv(clientfd, data, MAXLINE, 0);
+  long int fileSize = atoi(data);
+
+  if(fileSize >= 0) { // file size positive : no server error
+    size_t nbBytesRead; // stores how many bytes are read at each iteration
+    int nbBytesRemaning = fileSize; // stores how many bytes remain to be read
+    FILE* fd = fopen("test2.txt", "w"); // create the new file to copy into
+
+    while (nbBytesRemaning > 0) { // iterate until the whole file is read
+
+      nbBytesRead = recv(clientfd, data, (MAXBUF < nbBytesRemaning ? MAXBUF : nbBytesRemaning), 0); // read the correct amount of data
+      nbBytesRemaning -= nbBytesRead; // update how many bytes remain to ne read
+
+      fwrite(data, 1, nbBytesRead, fd); // writes the current data chunk into the file
+    }
+    fclose(fd);
+
+    clock_t after = clock(); // after timestamp for stats later
+    printf("Transfer successfull\n");
+    printf("%ld bytes received in %ld milliseconds\n", fileSize, (after - before)); // stats message
+
+  } else { // server sent a negative file size : server error
+    printf("Error : server couldn't find file. Please check command\n");
+  }
+
 }
