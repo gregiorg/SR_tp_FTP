@@ -5,6 +5,7 @@
 
 #include "csapp.h"
 
+void actionCmdClient(int clientfd, rio_t rio, char* rawCmd);
 void getCmdClient(int clientfd, rio_t rio, char* rawCmd);
 void putCmdClient(int clientfd, char* rawCmd, char* fileName);
 
@@ -44,7 +45,6 @@ int main(int argc, char **argv)
       printf("ftp> "); // prompt line
       if(Fgets(rawCmd, MAXLINE, stdin)) { // read user imput
           char** cmd = splitCmd(rawCmd);   // split raw cmd into tokens
-
           if(!strcmp("get", cmd[0])) {  // get command
               getCmdClient(clientfd, rio, rawCmd);
 
@@ -52,9 +52,10 @@ int main(int argc, char **argv)
             putCmdClient(clientfd, rawCmd, cmd[1]);
 
           } else if(!strcmp("bye", cmd[0])) { // client asked to end connection
-            Close(clientfd);
-            isConnectionOpen = 0;
-
+              Close(clientfd);
+              isConnectionOpen = 0;
+          } else if(!(strcmp("cd", cmd[0]) && strcmp("mkdir", cmd[0]) && strcmp("rm", cmd[0]))){
+              actionCmdClient(clientfd, rio, rawCmd);
           } else {
               printf("Unkown command\n");
           }
@@ -133,4 +134,9 @@ void putCmdClient(int clientfd, char* rawCmd, char* fileName) {
     printf("Error : can't open file. Check file name or permisions \n");
     send(clientfd, "-1", strlen("-1"), 0); // sending -1 as a file size to server
   }
+}
+
+//actionCmdClient is for cmd with no expected return value
+void actionCmdClient(int clientfd, rio_t rio, char* rawCmd){
+  send(clientfd, rawCmd, strlen(rawCmd), 0);
 }
