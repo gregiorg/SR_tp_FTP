@@ -5,7 +5,8 @@
 
 #include "csapp.h"
 
-void getCmdClient(int clientfd, rio_t rio, char* buf);
+void getCmdClient(int clientfd, char* buf);
+void infoCmdClient(int clientfd, char* rawCmd);
 
 int main(int argc, char **argv)
 {
@@ -45,7 +46,10 @@ int main(int argc, char **argv)
           char** cmd = splitCmd(rawCmd);   // split raw cmd into tokens
 
           if(!strcmp("get", cmd[0])) {  // get command
-              getCmdClient(clientfd, rio, rawCmd);
+              getCmdClient(clientfd, rawCmd);
+
+          } else if(!strcmp("ls", cmd[0]) | !strcmp("pwd", cmd[0])) { // info command
+            infoCmdClient(clientfd, rawCmd);
 
           } else if(!strcmp("bye", cmd[0])) { // client asked to end connection
             Close(clientfd);
@@ -66,7 +70,7 @@ int main(int argc, char **argv)
 * of the file and finally, the client reads the file MAXBUF bytes at a time.
 * In cass of error, server will send a negative file size
 */
-void getCmdClient(int clientfd, rio_t rio, char* rawCmd) {
+void getCmdClient(int clientfd, char* rawCmd) {
   char data[MAXBUF]; // buffer to read the file
 
   clock_t before = clock(); // before timestamp for stats later
@@ -98,5 +102,18 @@ void getCmdClient(int clientfd, rio_t rio, char* rawCmd) {
   } else { // server sent a negative file size : server error
     printf("Error : server couldn't find file. Please check command\n");
   }
+}
 
+/*
+* Function follows the protocole for commands that are asking for information from the server.
+* client simply sends command and waits for response
+*/
+void infoCmdClient(int clientfd, char* rawCmd) {
+  char data[MAXLINE]; // buffer to read the servers response
+
+  send(clientfd, rawCmd, strlen(rawCmd), 0); // send the user command
+
+  recv(clientfd, data, MAXLINE, 0); // receive the information from the server
+
+  printf("%s\n", data); // display for user
 }
