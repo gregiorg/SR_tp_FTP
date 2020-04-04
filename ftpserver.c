@@ -9,6 +9,11 @@
 
 void ftp(int connfd);
 
+typedef struct {
+  char* login;
+  char* password;
+} ftpid_t;
+
 void sigchldHandler(int sig) {
   int status;
   waitpid(-1, &status, WNOHANG|WUNTRACED);
@@ -54,6 +59,58 @@ int main(int argc, char **argv)
 
           printf("server connected to %s (%s)\n", client_hostname,
                  client_ip_string);
+
+          // loop to read all existing IDs
+          FILE* fIDs;
+          ftpid_t* allIDs = malloc(0);
+          int currentIDindex = 0;
+          if((fIDs = fopen("IDs.txt", "r"))) { // open file containing all logins and passwords
+
+            char* line;
+            size_t n = 0;
+            ftpid_t* allIDs = malloc(0);
+            int currentIDindex = 0;
+            while(getline(&line, &n, fIDs) > 0) { // read all lines of the file. line contains login and password
+              allIDs = realloc(allIDs, (currentIDindex + 1) * sizeof(ftpid_t));
+              char** splitLine = splitCmd(line);
+              allIDs[currentIDindex].login = splitLine[0];
+              allIDs[currentIDindex].password = splitLine[1];
+              currentIDindex++;
+            }
+            free(line); // because of getline()
+
+            // for(int i = 0; i < currentIDindex; i++) {
+            //   printf("login : %s\n", allIDs[i].login);
+            //   printf("password : %s\n\n", allIDs[i].password);
+            // }
+
+          } else {
+            printf("Error : coudn't find ID file\n");
+            exit(-1);
+          }
+
+          // loop the read the ID sent from the client
+          int isConnectionOpen = 0;
+          while(!isConnectionOpen) {
+            char* login = "";
+            char* password = "";
+
+            recv(connfd, login, MAXLINE, 0);
+            recv(connfd, password, MAXLINE, 0);
+
+            for(int i = 0; i < currentIDindex; i++) {
+              // printf("login : %s\n", allIDs[i].login);
+              // printf("password : %s\n\n", allIDs[i].password);
+
+              if(!strcmp(allIDs[i].login, login) && !strcmp(allIDs[i].password, password)) {
+                isConnectionOpen = 1;
+              }
+            }
+
+            char* res = "";
+            sprintf(res, "%d", isConnectionOpen);
+            send(connfd, res, strlen(res), 0);
+          }
 
           ftp(connfd);
           Close(connfd);

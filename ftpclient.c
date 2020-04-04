@@ -38,9 +38,26 @@ int main(int argc, char **argv)
 
     Rio_readinitb(&rio, clientfd);
 
-    // TODO : ID loop
+    int isConnectionOpen = 0;
 
-    int isConnectionOpen = 1;
+    while(!isConnectionOpen) {
+      char* login = "";
+      char* password = "";
+      char* servRes = "";
+
+      printf("ftp> login : ");
+      Fgets(login, MAXLINE, stdin);
+      printf("ftp> password : ");
+      Fgets(password, MAXLINE, stdin);
+
+      // TODO : need to refactor the get read of \n
+
+      send(clientfd, login, strlen(login), 0);
+      send(clientfd, password, strlen(password), 0);
+
+      recv(clientfd, servRes, MAXLINE, 0);
+      isConnectionOpen = atoi(servRes);
+    }
 
     while(isConnectionOpen) {
       printf("ftp> "); // prompt line
