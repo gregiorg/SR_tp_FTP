@@ -38,11 +38,14 @@ int main(int argc, char **argv)
 
     Rio_readinitb(&rio, clientfd);
 
+    // TODO : ID loop
+
     int isConnectionOpen = 1;
 
     while(isConnectionOpen) {
       printf("ftp> "); // prompt line
       if(Fgets(rawCmd, MAXLINE, stdin)) { // read user imput
+        if(strcmp("\n",rawCmd)) {
           char** cmd = splitCmd(rawCmd);   // split raw cmd into tokens
 
           if(!strcmp("get", cmd[0])) {  // get command
@@ -58,6 +61,7 @@ int main(int argc, char **argv)
           } else {
               printf("Unkown command\n");
           }
+        }
       }
     }
 
