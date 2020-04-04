@@ -5,7 +5,8 @@
 
 #include "csapp.h"
 
-void getCmdClient(int clientfd, rio_t rio, char* buf);
+void getCmdClient(int clientfd, rio_t rio, char* rawCmd);
+void putCmdClient(int clientfd, char* rawCmd, char* fileName);
 
 int main(int argc, char **argv)
 {
@@ -47,6 +48,9 @@ int main(int argc, char **argv)
           if(!strcmp("get", cmd[0])) {  // get command
               getCmdClient(clientfd, rio, rawCmd);
 
+          } else if(!strcmp("put", cmd[0])) { // put command
+            putCmdClient(clientfd, rawCmd, cmd[1]);
+
           } else if(!strcmp("bye", cmd[0])) { // client asked to end connection
             Close(clientfd);
             isConnectionOpen = 0;
@@ -85,7 +89,7 @@ void getCmdClient(int clientfd, rio_t rio, char* rawCmd) {
     while (nbBytesRemaning > 0) { // iterate until the whole file is read
 
       nbBytesRead = recv(clientfd, data, (MAXBUF < nbBytesRemaning ? MAXBUF : nbBytesRemaning), 0); // read the correct amount of data
-      nbBytesRemaning -= nbBytesRead; // update how many bytes remain to ne read
+      nbBytesRemaning -= nbBytesRead; // update how many bytes remain to be read
 
       fwrite(data, 1, nbBytesRead, fd); // writes the current data chunk into the file
     }
@@ -98,5 +102,35 @@ void getCmdClient(int clientfd, rio_t rio, char* rawCmd) {
   } else { // server sent a negative file size : server error
     printf("Error : server couldn't find file. Please check command\n");
   }
+}
 
+/*
+* Function that sends a file to the server.
+* Follows a similar protocole as the servers get :
+* Send files size and then send file with chunks of MAXBUF bytes
+*/
+void putCmdClient(int clientfd, char* rawCmd, char* fileName) {
+  FILE* fd;
+  char data[MAXBUF];
+
+  send(clientfd, rawCmd, strlen(rawCmd), 0);  // send raw cmd to server
+
+  if((fd = fopen(fileName, "r"))) { // opened successfully
+    // get file size and send it to server
+    fseek(fd, 0, SEEK_END);
+    long int fileSize = ftell(fd);
+    rewind(fd);
+    sprintf(data, "%ld", fileSize);
+    send(clientfd, data, strlen(data), 0);
+
+    int nbBytesRead;
+    while((nbBytesRead = fread(data, 1, MAXBUF, fd))) { // read MAXBUF bytes for data segmenting
+      send(clientfd, data, nbBytesRead, 0); // send to server
+    }
+    fclose(fd);
+    printf("File transfered\n");
+  } else { // client error : invalide file name
+    printf("Error : can't open file. Check file name or permisions \n");
+    send(clientfd, "-1", strlen("-1"), 0); // sending -1 as a file size to server
+  }
 }

@@ -5,6 +5,7 @@
 #include "csapp.h"
 
 void getCmdServer(int connfd, char** cmd);
+void putCmdServer(int connfd, char** cmd);
 
 void ftp(int connfd)
 {
@@ -18,8 +19,12 @@ void ftp(int connfd)
 
       char** cmd = splitCmd(rawCmd);   // split raw cmd into tokens
 
-      if (!strcmp("get", cmd[0])) { // user asked for a file transfer
+      if (!strcmp("get", cmd[0])) { // user asked for a file transfer from the server
         getCmdServer(connfd, cmd);
+
+      } else if (!strcmp("put", cmd[0])) { // user asked for a file transfer to the server
+        putCmdServer(connfd, cmd);
+
       }
     }
   }
@@ -30,7 +35,6 @@ void ftp(int connfd)
 * Sends the size of the file then the file itself by chunks of MAXBUF
 * In case of an error, sends a negative file size to the client
 */
-
 void getCmdServer(int connfd, char** cmd) {
   FILE* fd;
   char data[MAXBUF];
@@ -51,5 +55,33 @@ void getCmdServer(int connfd, char** cmd) {
   } else { // server error : invalide file name
     printf("Invalide file name\n");
     send(connfd, "-1", strlen("-1"), 0); // sending -1 as a file size to client
+  }
+}
+
+/*
+* Function receives a file sent from the client.
+* Protocole is similar to the clients get function :
+* receive the file size and read as many bytes as necessary. Read with chunks of MAXBUF bytes
+*/
+void putCmdServer(int connfd, char** cmd) {
+  char data[MAXBUF]; // buffer to read the file
+
+  // read the file size
+  recv(connfd, data, MAXLINE, 0);
+  long int fileSize = atoi(data);
+
+  if(fileSize >= 0) { // means all is good client side
+    size_t nbBytesRead; // stores how many bytes are read at each iteration
+    int nbBytesRemaning = fileSize; // stores how many bytes remain to be read
+    FILE* fd = fopen("test3.txt", "w"); // create the new file to copy into
+
+    while (nbBytesRemaning > 0) { // iterate until the whole file is read
+
+      nbBytesRead = recv(connfd, data, (MAXBUF < nbBytesRemaning ? MAXBUF : nbBytesRemaning), 0); // read the correct amount of data
+      nbBytesRemaning -= nbBytesRead; // update how many bytes remain to be read
+
+      fwrite(data, 1, nbBytesRead, fd); // writes the current data chunk into the file
+    }
+    fclose(fd);
   }
 }
