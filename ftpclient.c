@@ -39,11 +39,41 @@ int main(int argc, char **argv)
 
     Rio_readinitb(&rio, clientfd);
 
-    int isConnectionOpen = 1;
+    int isConnectionOpen = 0;
+
+    // login loop
+    while(!isConnectionOpen) {
+      // buffers
+      char login[MAXLINE];
+      char password[MAXLINE];
+      char servRes[MAXLINE];
+
+      printf("ftp> login : ");
+      Fgets(login, MAXLINE, stdin); // read user login
+      printf("ftp> password : ");
+      Fgets(password, MAXLINE, stdin); // read user password
+
+      // we get rid of the last \n character
+      login[strlen(login)-1] = '\0';
+      password[strlen(password)-1] = '\0';
+
+      if(strlen(login) && strlen(password)) { // just ignore if user didn't write anything
+        // send user inputs to server
+        send(clientfd, login, strlen(login), 0);
+        send(clientfd, password, strlen(password), 0);
+
+        // receive the connection state from server and convert to int
+        recv(clientfd, servRes, MAXLINE, 0);
+        isConnectionOpen = atoi(servRes);
+      }
+    }
+
+    printf("Logged in\n");
 
     while(isConnectionOpen) {
       printf("ftp> "); // prompt line
       if(Fgets(rawCmd, MAXLINE, stdin)) { // read user imput
+        if(strcmp("\n",rawCmd)) {
           char** cmd = splitCmd(rawCmd);   // split raw cmd into tokens
           if(!strcmp("get", cmd[0])) {  // get command
               getCmdClient(clientfd, rio, rawCmd);
@@ -59,6 +89,7 @@ int main(int argc, char **argv)
           } else {
               printf("Unkown command\n");
           }
+        }
       }
     }
 
