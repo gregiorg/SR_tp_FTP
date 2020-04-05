@@ -52,6 +52,13 @@ void getCmdServer(int connfd, char** cmd) {
     sprintf(data, "%ld", fileSize);
     send(connfd, data, strlen(data), 0);
 
+    // get client filesize
+    char strClientFileSize[MAXLINE];
+    recv(connfd, strClientFileSize, MAXLINE, 0);
+    long int clientFileSize = atoi(strClientFileSize); // should = 0 if file transfer wasn't interupted
+
+    fseek(fd, clientFileSize, SEEK_SET); // nothing happens here if transfer wasn't interupted
+
     int nbBytesRead;
     while((nbBytesRead = fread(data, 1, MAXBUF, fd))) { // read MAXBUF bytes for data segmenting
       send(connfd, data, nbBytesRead, 0); // send to client

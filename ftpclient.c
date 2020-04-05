@@ -116,9 +116,25 @@ void getCmdClient(int clientfd, rio_t rio, char* rawCmd) {
   if(fileSize >= 0) { // file size positive : no server error
     size_t nbBytesRead; // stores how many bytes are read at each iteration
     int nbBytesRemaning = fileSize; // stores how many bytes remain to be read
-    FILE* fd = fopen("test2.txt", "w"); // create the new file to copy into
+
+    FILE* fd;
+    long int localFileSize;
+    if(access(".tmp", F_OK) == 0) { // .tmp exists : the transfer was interupted
+      fd = fopen("test2.txt", "a"); // we'll append to last instance of the file
+      localFileSize = ftell(fd);
+      sprintf(data, "%ld", localFileSize);
+      send(clientfd, data, strlen(data), 0); // send local file size
+
+    } else { // tmp doesn't exist : no interupted transfer
+      fopen(".tmp", "w"); // marker file that stays if transfer is interupted
+      fd = fopen("test2.txt", "w"); // create or overwrite the file the file
+      localFileSize = 0;
+      send(clientfd, "0", 1, 0); // send local file size
+    }
+    nbBytesRemaning -= localFileSize; // nothing happens here if transfer wasn't interupted
 
     while (nbBytesRemaning > 0) { // iterate until the whole file is read
+      sleep(1);
 
       nbBytesRead = recv(clientfd, data, (MAXBUF < nbBytesRemaning ? MAXBUF : nbBytesRemaning), 0); // read the correct amount of data
       nbBytesRemaning -= nbBytesRead; // update how many bytes remain to be read
@@ -126,6 +142,7 @@ void getCmdClient(int clientfd, rio_t rio, char* rawCmd) {
       fwrite(data, 1, nbBytesRead, fd); // writes the current data chunk into the file
     }
     fclose(fd);
+    remove(".tmp");
 
     clock_t after = clock(); // after timestamp for stats later
     printf("Transfer successfull\n");
