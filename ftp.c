@@ -5,6 +5,9 @@
 #include "csapp.h"
 
 void getCmdServer(int connfd, char** cmd);
+
+void actionCmdServer(int connfd, char** cmd);
+
 void putCmdServer(int connfd, char** cmd);
 
 void ftp(int connfd)
@@ -22,9 +25,11 @@ void ftp(int connfd)
       if (!strcmp("get", cmd[0])) { // user asked for a file transfer from the server
         getCmdServer(connfd, cmd);
 
+      }else if(!(strcmp("cd", cmd[0]) && strcmp("mkdir", cmd[0]) && strcmp("rm", cmd[0]))){
+        actionCmdServer(connfd, cmd);
+
       } else if (!strcmp("put", cmd[0])) { // user asked for a file transfer to the server
         putCmdServer(connfd, cmd);
-
       }
     }
   }
@@ -58,6 +63,11 @@ void getCmdServer(int connfd, char** cmd) {
   }
 }
 
+void actionCmdServer(int connfd, char** cmd){
+  if (!fork()){
+    execvp(cmd[0], cmd);
+  }
+}
 /*
 * Function receives a file sent from the client.
 * Protocole is similar to the clients get function :
