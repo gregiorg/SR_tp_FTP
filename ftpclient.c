@@ -5,6 +5,7 @@
 
 #include "csapp.h"
 
+void infoCmdClient(int clientfd, char* rawCmd);
 void actionCmdClient(int clientfd, rio_t rio, char* rawCmd);
 void getCmdClient(int clientfd, rio_t rio, char* rawCmd);
 void putCmdClient(int clientfd, char* rawCmd, char* fileName);
@@ -76,7 +77,10 @@ int main(int argc, char **argv)
         if(strcmp("\n",rawCmd)) {
           char** cmd = splitCmd(rawCmd);   // split raw cmd into tokens
           if(!strcmp("get", cmd[0])) {  // get command
-              getCmdClient(clientfd, rio, rawCmd);
+              getCmdClient(clientfd, rawCmd);
+
+          } else if(!strcmp("ls", cmd[0]) | !strcmp("pwd", cmd[0])) { // info command
+            infoCmdClient(clientfd, rawCmd);
 
           } else if(!strcmp("put", cmd[0])) { // put command
             putCmdClient(clientfd, rawCmd, cmd[1]);
@@ -102,7 +106,7 @@ int main(int argc, char **argv)
 * of the file and finally, the client reads the file MAXBUF bytes at a time.
 * In cass of error, server will send a negative file size
 */
-void getCmdClient(int clientfd, rio_t rio, char* rawCmd) {
+void getCmdClient(int clientfd, char* rawCmd) {
   char data[MAXBUF]; // buffer to read the file
 
   clock_t before = clock(); // before timestamp for stats later
@@ -154,6 +158,19 @@ void getCmdClient(int clientfd, rio_t rio, char* rawCmd) {
 }
 
 /*
+
+* Function follows the protocole for commands that are asking for information from the server.
+* client simply sends command and waits for response
+*/
+void infoCmdClient(int clientfd, char* rawCmd) {
+  char data[MAXLINE]; // buffer to read the servers response
+
+  send(clientfd, rawCmd, strlen(rawCmd), 0); // send the user command
+
+  recv(clientfd, data, MAXLINE, 0); // receive the information from the server
+
+  printf("%s\n", data); // display for user
+}
 * Function that sends a file to the server.
 * Follows a similar protocole as the servers get :
 * Send files size and then send file with chunks of MAXBUF bytes
@@ -187,4 +204,5 @@ void putCmdClient(int clientfd, char* rawCmd, char* fileName) {
 //actionCmdClient is for cmd with no expected return value
 void actionCmdClient(int clientfd, rio_t rio, char* rawCmd){
   send(clientfd, rawCmd, strlen(rawCmd), 0);
+
 }
