@@ -907,14 +907,18 @@ int Inet_pton(int af, const char *src, void *dst)
  * return : char** - an array of strings
 */
 char** splitCmd(char* rawCmd) {
-    char** resCmd = malloc(2*sizeof(char**));
+    char** resCmd = malloc(sizeof(char*));
     char delim[] = " \n";
     char* tempCmd = malloc(strlen(rawCmd));
     strcpy(tempCmd, rawCmd);
-
-    resCmd[0] = strtok(tempCmd, delim);
-    resCmd[1] = strtok(NULL, delim);
-
+    int nbword = 0;
+    char *curWord;
+    curWord = strtok(tempCmd, delim);
+    while (curWord != NULL){
+        resCmd[nbword++] = curWord;
+        curWord = strtok(NULL, delim);
+        resCmd = realloc(resCmd, nbword * sizeof(char*));
+    }
     return resCmd;
 }
 
