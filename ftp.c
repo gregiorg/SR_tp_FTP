@@ -6,7 +6,7 @@
 
 void getCmdServer(int connfd, char** cmd);
 void infoCmdServer(int connfd, char** cmd);
-void actionCmdServer(int connfd, char* rawCmd);
+void actionCmdServer(int connfd, char** cmd);
 void putCmdServer(int connfd, char** cmd);
 
 void ftp(int connfd)
@@ -19,6 +19,7 @@ void ftp(int connfd)
   while((n = Rio_readlineb(&rio, rawCmd, MAXBUF))) { // read the current user command
     if (n > 1) { // n <= 1 would mean no actual ASCII symbol has been transmited
 
+      printf("rawCmd = %s\n", rawCmd);
       char** cmd = splitCmd(rawCmd);   // split raw cmd into tokens
 
       if (!strcmp("get", cmd[0])) { // user asked for a file transfer from the server
@@ -28,7 +29,7 @@ void ftp(int connfd)
         infoCmdServer(connfd, cmd);
 
       }else if(!(strcmp("cd", cmd[0]) && strcmp("mkdir", cmd[0]) && strcmp("rm", cmd[0]))){
-        actionCmdServer(connfd, rawCmd);
+        actionCmdServer(connfd, cmd);
 
       } else if (!strcmp("put", cmd[0])) { // user asked for a file transfer to the server
         putCmdServer(connfd, cmd);
@@ -101,12 +102,21 @@ void infoCmdServer(int connfd, char** cmd){
     send(connfd, data, nbBytesRead, 0); // send data to the client
   }
 }
-void actionCmdServer(int connfd, char* rawCmd){
-  // if (!fork()){
-  //   execvp(cmd[0], cmd);
-  // }
-  system(rawCmd);
+
+/*
+* function used to execute commands without sending output to client
+* cd can't be used with multiproccessing so it's implemented with chdir
+*/
+void actionCmdServer(int connfd, char** cmd){
+  if (!(strcmp(cmd[0],"cd"))){
+    chdir(cmd[1]);
+  }else{
+    if (!fork()){
+     execvp(cmd[0], cmd);
+    }
+  }
 }
+
 /*
 * Function receives a file sent from the client.
 * Protocole is similar to the clients get function :
@@ -132,6 +142,5 @@ void putCmdServer(int connfd, char** cmd) {
       fwrite(data, 1, nbBytesRead, fd); // writes the current data chunk into the file
     }
     fclose(fd);
-
   }
 }

@@ -158,7 +158,6 @@ void getCmdClient(int clientfd, char* rawCmd) {
 }
 
 /*
-
 * Function follows the protocole for commands that are asking for information from the server.
 * client simply sends command and waits for response
 */
@@ -171,6 +170,7 @@ void infoCmdClient(int clientfd, char* rawCmd) {
 
   printf("%s\n", data); // display for user
 }
+
 /*
 * Function that sends a file to the server.
 * Follows a similar protocole as the servers get :
@@ -202,8 +202,9 @@ void putCmdClient(int clientfd, char* rawCmd, char* fileName) {
   }
 }
 
-//actionCmdClient is for cmd with no expected return value
+/*
+* actionCmdClient is for cmd with no expected return value
+*/
 void actionCmdClient(int clientfd, rio_t rio, char* rawCmd){
   send(clientfd, rawCmd, strlen(rawCmd), 0);
-
 }
