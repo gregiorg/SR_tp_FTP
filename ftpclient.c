@@ -7,7 +7,7 @@
 
 void infoCmdClient(int clientfd, char* rawCmd);
 void actionCmdClient(int clientfd, rio_t rio, char* rawCmd);
-void getCmdClient(int clientfd, rio_t rio, char* rawCmd);
+void getCmdClient(int clientfd, char* rawCmd);
 void putCmdClient(int clientfd, char* rawCmd, char* fileName);
 
 int main(int argc, char **argv)
@@ -171,6 +171,7 @@ void infoCmdClient(int clientfd, char* rawCmd) {
 
   printf("%s\n", data); // display for user
 }
+/*
 * Function that sends a file to the server.
 * Follows a similar protocole as the servers get :
 * Send files size and then send file with chunks of MAXBUF bytes

@@ -6,9 +6,7 @@
 
 void getCmdServer(int connfd, char** cmd);
 void infoCmdServer(int connfd, char** cmd);
-
-void actionCmdServer(int connfd, char** cmd);
-
+void actionCmdServer(int connfd, char* rawCmd);
 void putCmdServer(int connfd, char** cmd);
 
 void ftp(int connfd)
@@ -30,7 +28,7 @@ void ftp(int connfd)
         infoCmdServer(connfd, cmd);
 
       }else if(!(strcmp("cd", cmd[0]) && strcmp("mkdir", cmd[0]) && strcmp("rm", cmd[0]))){
-        actionCmdServer(connfd, cmd);
+        actionCmdServer(connfd, rawCmd);
 
       } else if (!strcmp("put", cmd[0])) { // user asked for a file transfer to the server
         putCmdServer(connfd, cmd);
@@ -86,12 +84,6 @@ void infoCmdServer(int connfd, char** cmd){
   int p[2];
   pipe(p);
 
-  // if (!strcmp("pwd", cmd[0])) {
-  //   char data[MAXBUF];
-  //   read(p[0], data, MAXBUF);
-  //   printf("%s\n", data);
-  // }
-
   /* child process executes the command and stores the result in the pipe
      parent reads in the pipe and sends data to the client */
   if(!Fork()) { // child process
@@ -107,17 +99,13 @@ void infoCmdServer(int connfd, char** cmd){
     nbBytesRead = read(p[0], data, MAXBUF); // read from the pipes output
     close(p[0]); // close pipes output
     send(connfd, data, nbBytesRead, 0); // send data to the client
-
-    // printf("server just sent : \n");
-    // printf("%s\n", data); // ICI MONSIEUR !!!!!!!!!!!!!!!!
-    /* TODO : there seems to be data in the pipe even after the read.
-       need to flush the pipe */
   }
 }
-void actionCmdServer(int connfd, char** cmd){
-  if (!fork()){
-    execvp(cmd[0], cmd);
-  }
+void actionCmdServer(int connfd, char* rawCmd){
+  // if (!fork()){
+  //   execvp(cmd[0], cmd);
+  // }
+  system(rawCmd);
 }
 /*
 * Function receives a file sent from the client.
