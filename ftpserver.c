@@ -68,8 +68,6 @@ int main(int argc, char **argv)
 
             char* line;
             size_t n = 0;
-            ftpid_t* allIDs = malloc(0);
-            int currentIDindex = 0;
             while(getline(&line, &n, fIDs) > 0) { // read all lines of the file. line contains login and password
               allIDs = realloc(allIDs, (currentIDindex + 1) * sizeof(ftpid_t));
               char** splitLine = splitCmd(line);
@@ -79,35 +77,31 @@ int main(int argc, char **argv)
             }
             free(line); // because of getline()
 
-            // for(int i = 0; i < currentIDindex; i++) {
-            //   printf("login : %s\n", allIDs[i].login);
-            //   printf("password : %s\n\n", allIDs[i].password);
-            // }
-
           } else {
             printf("Error : coudn't find ID file\n");
             exit(-1);
           }
+          // all IDs are stored in allIDs
 
           // loop the read the ID sent from the client
           int isConnectionOpen = 0;
           while(!isConnectionOpen) {
-            char* login = "";
-            char* password = "";
+            // buffers
+            char login[MAXLINE];
+            char password[MAXLINE];
+            char res[MAXLINE];
 
+            // get login data fromclient
             recv(connfd, login, MAXLINE, 0);
             recv(connfd, password, MAXLINE, 0);
 
+            // compare login data to all stored IDs
             for(int i = 0; i < currentIDindex; i++) {
-              // printf("login : %s\n", allIDs[i].login);
-              // printf("password : %s\n\n", allIDs[i].password);
-
               if(!strcmp(allIDs[i].login, login) && !strcmp(allIDs[i].password, password)) {
                 isConnectionOpen = 1;
               }
             }
-
-            char* res = "";
+            // send connection state to client
             sprintf(res, "%d", isConnectionOpen);
             send(connfd, res, strlen(res), 0);
           }
@@ -115,6 +109,7 @@ int main(int argc, char **argv)
           ftp(connfd);
           Close(connfd);
         }
+        printf("a child just died\n");
         exit(0);
       }
     }

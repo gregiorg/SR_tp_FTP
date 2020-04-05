@@ -40,24 +40,34 @@ int main(int argc, char **argv)
 
     int isConnectionOpen = 0;
 
+    // login loop
     while(!isConnectionOpen) {
-      char* login = "";
-      char* password = "";
-      char* servRes = "";
+      // buffers
+      char login[MAXLINE];
+      char password[MAXLINE];
+      char servRes[MAXLINE];
 
       printf("ftp> login : ");
-      Fgets(login, MAXLINE, stdin);
+      Fgets(login, MAXLINE, stdin); // read user login
       printf("ftp> password : ");
-      Fgets(password, MAXLINE, stdin);
+      Fgets(password, MAXLINE, stdin); // read user password
 
-      // TODO : need to refactor the get read of \n
+      // we get rid of the last \n character
+      login[strlen(login)-1] = '\0';
+      password[strlen(password)-1] = '\0';
 
-      send(clientfd, login, strlen(login), 0);
-      send(clientfd, password, strlen(password), 0);
+      if(strlen(login) && strlen(password)) { // just ignore if user didn't write anything
+        // send user inputs to server
+        send(clientfd, login, strlen(login), 0);
+        send(clientfd, password, strlen(password), 0);
 
-      recv(clientfd, servRes, MAXLINE, 0);
-      isConnectionOpen = atoi(servRes);
+        // receive the connection state from server and convert to int
+        recv(clientfd, servRes, MAXLINE, 0);
+        isConnectionOpen = atoi(servRes);
+      }
     }
+
+    printf("Logged in\n");
 
     while(isConnectionOpen) {
       printf("ftp> "); // prompt line
